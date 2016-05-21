@@ -28,6 +28,8 @@ options(mc.cores = parallel::detectCores())
 
 stanfit<-stan("gamma_test.stan") #call STAN  
 print(stanfit)                   #print a summary of the results
+
+print(get_stanmodel(stanfit))    #print the model file
 @
 
 Launch shinystan

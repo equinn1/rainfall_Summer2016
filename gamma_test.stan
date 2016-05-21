@@ -1,3 +1,7 @@
+//mixture model 
+//  probability of measurable rain is Bernoulli with parameter theta
+//  rainfall amount given measurable rainfall is gamma(alpha,beta)
+//
 data { 
   int<lower=1> N;               //number of observations
   real<lower=0> y[N];           //rainfall amount
