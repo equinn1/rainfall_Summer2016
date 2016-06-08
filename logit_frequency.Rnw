@@ -1,0 +1,97 @@
+\documentclass{article}
+
+\begin{document}
+
+<<>>=
+rainf<-function(site,dm,dr){
+  rainsel<-paste("rain_",site,sep='')
+  print(rainsel)
+  raincol<-match(rainsel,names(rainfall))
+  print(raincol)
+  tempdf<-rainfall[!is.na(rainfall[[raincol]]),]
+  raincol<-match(rainsel,names(tempdf))
+  measurable_rain<-as.numeric(tempdf[[raincol]]>0)
+  sitename<-rep(site,nrow(tempdf))
+  dseq<-(as.numeric(tempdf$date)-dm)/(dr/4)
+  rdf<-data.frame(sitename,measurable_rain,dseq)
+  rm(tempdf)
+  return(rdf)
+}
+@
+
+<<>>=
+library(lubridate)
+load("marain.Rdata")
+str(rainfall)
+seqdate<-as.numeric(rainfall$date)
+str(seqdate)
+date_range<-max(seqdate)-min(seqdate)
+date_mean=mean(seqdate)
+
+ldf<-rainf("amherst",date_mean,date_range)  #start with amherst
+
+df<-rainf("bluehill",date_mean,date_range)  #add bluehill
+ldf<-rbind(ldf,df)
+
+df<-rainf("taunton",date_mean,date_range)  #add taunton
+ldf<-rbind(ldf,df)
+
+df<-rainf("pk",date_mean,date_range)  #add pk
+ldf<-rbind(ldf,df)
+
+df<-rainf("lawrence",date_mean,date_range)  #add lawrence
+ldf<-rbind(ldf,df)
+
+df<-rainf("bedford",date_mean,date_range)  #add bedford
+ldf<-rbind(ldf,df)
+
+df<-rainf("gb",date_mean,date_range)  #add gb
+ldf<-rbind(ldf,df)
+
+df<-rainf("ptown",date_mean,date_range)  #add ptown
+ldf<-rbind(ldf,df)
+
+df<-rainf("nb",date_mean,date_range)  #add nb
+ldf<-rbind(ldf,df)
+
+df<-rainf("reading",date_mean,date_range)  #add reading
+ldf<-rbind(ldf,df)
+
+df<-rainf("walpole",date_mean,date_range)  #add walpole
+ldf<-rbind(ldf,df)
+
+df<-rainf("wm",date_mean,date_range)  #add wm
+ldf<-rbind(ldf,df)
+
+str(ldf)
+measurable_rain<-ldf$measurable_rain
+dseq<-ldf$dseq
+site<-as.numeric(ldf$sitename)
+Nsites<-length(levels(ldf$sitename))
+N<-nrow(ldf)
+st<-table(site)
+str(st)
+levels(ldf$sitename)
+s<-st[1:length(st)]
+@
+
+Call STAN
+
+<<>>=
+library(rstan)
+rstan_options(auto_write = TRUE)
+options(mc.cores = parallel::detectCores())
+
+stanfit<-stan("logit_frequency.stan") #call STAN  
+print(stanfit)                   #print a summary of the results
+save(stanfit,file="logit_frequency.Rdata")
+print(get_stanmodel(stanfit))    #print the model file
+@
+
+Launch shinystan
+
+<<>>=
+library(shinystan)               #downloaded from cran
+launch_shinystan(stanfit)
+@
+\end{document}
