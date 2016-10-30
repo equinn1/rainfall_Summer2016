@@ -13,7 +13,7 @@ library(shinystan)   #downloaded from cran
 pgm_name="precip_gamma_test"
 
 get_rainfall<-function(infile,dfname,site){
-  dfname<-read.csv(infile)
+  dfname<-read.csv(paste("../",infile,sep=""))
   dfname<-cbind(dfname,rep(site,nrow(dfname)))
   names(dfname)<-c("n","year","month","day","rain_mm","X01","site")
   return(dfname)
