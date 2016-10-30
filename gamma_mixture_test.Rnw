@@ -1,0 +1,99 @@
+\documentclass{article}
+
+\begin{document}
+
+<<>>=
+library(rstan)
+rstan_options(auto_write = TRUE)
+options(mc.cores = parallel::detectCores())
+
+#library(ShinyStan)  #not available on cran for R3.2.2
+library(shinystan)   #downloaded from cran
+
+pgm_name="precip_gamma_test"
+
+get_rainfall<-function(infile,dfname,site){
+  dfname<-read.csv(infile)
+  dfname<-cbind(dfname,rep(site,nrow(dfname)))
+  names(dfname)<-c("n","year","month","day","rain_mm","X01","site")
+  return(dfname)
+}
+
+Nsites<-1
+
+rainfall<-get_rainfall("amherstPRECIP.csv","rainfall",Nsites)
+names(rainfall)<-c("n","year","month","day","rain_mm","X01","site")
+
+Nsites<-Nsites+1
+temp<-get_rainfall("bedfordPRECIP.csv","temp",Nsites)
+names(temp)<-c("n","year","month","day","rain_mm","X01","site")
+rainfall<-rbind(rainfall,temp)
+
+Nsites<-Nsites+1
+temp<-get_rainfall("bluehillPRECIP.csv","temp",Nsites)
+names(temp)<-c("n","year","month","day","rain_mm","X01","site")
+rainfall<-rbind(rainfall,temp)
+
+Nsites<-Nsites+1
+temp<-get_rainfall("gbPRECIP.csv","temp",Nsites)
+names(temp)<-c("n","year","month","day","rain_mm","X01","site")
+rainfall<-rbind(rainfall,temp)
+
+Nsites<-Nsites+1
+temp<-get_rainfall("lawrencePRECIP.csv","temp",Nsites)
+names(temp)<-c("n","year","month","day","rain_mm","X01","site")
+rainfall<-rbind(rainfall,temp)
+
+Nsites<-Nsites+1
+temp<-get_rainfall("nbPRECIP.csv","temp",Nsites)
+names(temp)<-c("n","year","month","day","rain_mm","X01","site")
+rainfall<-rbind(rainfall,temp)
+
+Nsites<-Nsites+1
+temp<-get_rainfall("pkPRECIP.csv","temp",Nsites)
+names(temp)<-c("n","year","month","day","rain_mm","X01","site")
+rainfall<-rbind(rainfall,temp)
+
+Nsites<-Nsites+1
+temp<-get_rainfall("ptownPRECIP.csv","temp",Nsites)
+names(temp)<-c("n","year","month","day","rain_mm","X01","site")
+rainfall<-rbind(rainfall,temp)
+
+Nsites<-Nsites+1
+temp<-get_rainfall("readingPRECIP.csv","temp",Nsites)
+names(temp)<-c("n","year","month","day","rain_mm","X01","site")
+rainfall<-rbind(rainfall,temp)
+
+Nsites<-Nsites+1
+temp<-get_rainfall("tauntonPRECIP.csv","temp",Nsites)
+names(temp)<-c("n","year","month","day","rain_mm","X01","site")
+rainfall<-rbind(rainfall,temp)
+
+Nsites<-Nsites+1
+temp<-get_rainfall("walpolePRECIP.csv","temp",Nsites)
+names(temp)<-c("n","year","month","day","rain_mm","X01","site")
+rainfall<-rbind(rainfall,temp)
+
+Nsites<-Nsites+1
+temp<-get_rainfall("wmPRECIP.csv","temp",Nsites)
+names(temp)<-c("n","year","month","day","rain_mm","X01","site")
+rainfall<-rbind(rainfall,temp)
+
+str(rainfall)
+
+rainfall2<-subset(rainfall,!is.na(rain_mm) & year>1900 & year < 1996)
+
+N<-nrow(rainfall2)
+site<-rainfall2$site
+
+y<-rainfall2$rain_mm   #rainfall mm
+
+stanfit<-stan("gamma_mixture.stan",chains=8)
+print(stanfit)
+save(stanfit,file="gamma_mixture_test_v2.Rdata")
+launch_shinystan(stanfit)
+pd<-extract(stanfit)
+str(pd)
+@
+
+\end{document}
