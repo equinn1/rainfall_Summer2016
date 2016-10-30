@@ -87,7 +87,10 @@ N<-nrow(rainfall2)
 site<-rainfall2$site
 
 y<-rainfall2$rain_mm   #rainfall mm
+@
 
+
+<<>>=
 stanfit<-stan("gamma_mixture.stan",chains=8)
 print(stanfit)
 save(stanfit,file="gamma_mixture_test_v2.Rdata")
